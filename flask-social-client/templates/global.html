@@ -1,0 +1,22 @@
+<html>
+  <head>
+    <title>Social Client</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css"
+      integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/index.css') }}"
+    />
+  </head>
+  <body>
+    <main>
+      <h1>Social Client</h1>
+      <h3>Logged in as <b>{{ user_id }}</b></h3>
+      {% block content %} {%endblock %}
+    </main>
+  </body>
+</html>

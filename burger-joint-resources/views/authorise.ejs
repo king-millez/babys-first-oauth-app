@@ -1,0 +1,19 @@
+<h1>Grant <%= clientName %> access to your Burger Resources?</h1>
+<p>
+  <%= clientName %> will be able to see how many burgers you've eaten, and you
+  may be judged.
+</p>
+<br>
+<p>Requested scopes:</p>
+<br>
+<ul>
+  <% scope.split(' ').forEach(function(scope) { %>
+    <li><%= scope %></li>
+  <% }); %>
+</ul>
+<form action="/access">
+  <input type="hidden" name="client_id" value="<%= clientId %>" />
+  <input type="hidden" name="scope" value="<%= scope %>" />
+  <button type="submit">Allow</button>
+  <button type="button" onclick="window.location = '/';">Deny</button>
+</form>

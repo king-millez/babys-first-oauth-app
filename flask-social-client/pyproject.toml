@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "flask-social-client"
+version = "1.0.0"
+description = "A social media site OAuth 2.0 client."
+authors = ["Miles Greenwark"]
+license = "UNLICENSED"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+Flask = "^3.0.3"
+evarify = "^0.1.1"
+requests = "^2.31.0"
+pymongo = "^4.7.0"
+cryptography = "^42.0.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

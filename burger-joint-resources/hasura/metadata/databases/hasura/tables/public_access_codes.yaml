@@ -1,0 +1,28 @@
+table:
+  name: access_codes
+  schema: public
+object_relationships:
+  - name: clients
+    using:
+      manual_configuration:
+        column_mapping:
+          client: id
+        insertion_order: null
+        remote_table:
+          name: clients
+          schema: public
+array_relationships:
+  - name: access_tokens
+    using:
+      foreign_key_constraint_on:
+        column: access_code
+        table:
+          name: access_tokens
+          schema: public
+  - name: refresh_tokens
+    using:
+      foreign_key_constraint_on:
+        column: auth_code
+        table:
+          name: refresh_tokens
+          schema: public
