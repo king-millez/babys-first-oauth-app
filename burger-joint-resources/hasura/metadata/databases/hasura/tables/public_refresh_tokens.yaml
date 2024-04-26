@@ -1,0 +1,7 @@
+table:
+  name: refresh_tokens
+  schema: public
+object_relationships:
+  - name: access_code
+    using:
+      foreign_key_constraint_on: auth_code

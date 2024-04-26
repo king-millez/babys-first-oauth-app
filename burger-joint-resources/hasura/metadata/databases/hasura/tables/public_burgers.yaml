@@ -1,0 +1,3 @@
+table:
+  name: burgers
+  schema: public

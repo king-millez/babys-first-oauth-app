@@ -1,0 +1,99 @@
+version: "3.6"
+services:
+  # Express JS OAuth 2.0 auth & resource server
+  burger-joint-postgres:
+    image: postgres:15
+    restart: always
+    ports:
+      - 65432:5432
+    environment:
+      POSTGRES_USER: hasura
+      POSTGRES_PASSWORD: hasura
+      POSTGRES_DB: hasura
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "hasura"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+  burger-joint-graphql:
+    container_name: burger-joint-graphql
+    depends_on:
+      - burger-joint-postgres
+    restart: on-failure
+    ports:
+      - 8080:8080
+    volumes:
+      - ./burger-joint-resources/hasura/config.yaml:/home/hasura/config.yaml
+      - ./burger-joint-resources/hasura/metadata:/home/hasura/metadata
+      - ./burger-joint-resources/hasura/migrations:/home/hasura/migrations
+      - ./burger-joint-resources/hasura/seeds:/home/hasura/seeds
+    image: hasura/graphql-engine:latest.cli-migrations-v3
+    environment:
+      - HASURA_GRAPHQL_DATABASE_URL=postgres://hasura:hasura@burger-joint-postgres:5432/hasura
+      - HASURA_GRAPHQL_ENABLE_CONSOLE=true
+      - HASURA_GRAPHQL_ADMIN_SECRET=${GRAPHQL_ADMIN_SECRET}
+      - HASURA_GRAPHQL_MIGRATIONS_DIR=/home/hasura/migrations
+      - HASURA_GRAPHQL_METADATA_DIR=/home/hasura/metadata
+  burger-joint-express:
+    depends_on:
+      - burger-joint-graphql
+    build: ./burger-joint-resources
+    restart: on-failure
+    ports:
+      - 3000:3000
+    command: npm run start
+    environment:
+      - GRAPHQL_URI=${GRAPHQL_URI}
+      - USER_ID=${USER_ID}
+      - GRAPHQL_ADMIN_SECRET=${GRAPHQL_ADMIN_SECRET}
+      - BURGER_RESOURCES_BASE_URL=${BURGER_RESOURCES_BASE_URL}
+      - JWT_SECRET=${BURGER_AUTH_JWT_SECRET}
+      - BURGER_AUTH_JWT_PUB_KEY=${BURGER_AUTH_JWT_PUB_KEY}
+      - BURGER_AUTH_JWT_PRIVATE_KEY=${BURGER_AUTH_JWT_PRIVATE_KEY}
+    hostname: burger.local
+    healthcheck:
+      test: ["CMD", "curl", "http://burger-joint-express:3000"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+
+  # Flask OAuth 2.0 client
+  flask-social-mongodb:
+    container_name: flask-social-mongodb
+    build: ./flask-social-client/mongodb
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_DATABASE: client-social
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+  flask-social-flask:
+    depends_on:
+      - flask-social-mongodb
+      - burger-joint-express
+    build: ./flask-social-client
+    restart: on-failure
+    ports:
+      - 5000:5000
+    command: /root/.local/bin/poetry run flask run --host=0.0.0.0
+    environment:
+      - MONGO_URI=mongodb://root:root@flask-social-mongodb:27017
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET=Sup3rSecre7!#@@ # Hello, GitHub secret scraper 🤓
+      - USER_ID=${USER_ID}
+      - TOKEN_AES_KEY=${TOKEN_AES_KEY}
+      - BURGER_RESOURCES_BASE_URL=${BURGER_RESOURCES_BASE_URL}
+      - SOCIAL_CLIENT_BASE_URL=${SOCIAL_CLIENT_BASE_URL}
+    hostname: social.local
+networks:
+  oauth_bridge:
+    driver: bridge
