@@ -8,6 +8,7 @@ import { oauthClientById } from "./lib/graphql/oauth-clients";
 import { getLogger } from "./lib/logger";
 import {
   authoriseQuerySchema,
+  clientIdPresentSchema,
   clientQuerySchema,
   redirectUriPresentSchema,
 } from "./lib/oauth/authorise";
@@ -49,7 +50,7 @@ app.get("/authorise", async (req, res) => {
 
   const assertedRedirectUri = maybeRedirectUri.data.redirect_uri;
 
-  const maybeClientId = clientQuerySchema.safeParse(req.query);
+  const maybeClientId = clientIdPresentSchema.safeParse(req.query);
 
   if (!maybeClientId.success) {
     res.status(400).send("Invalid or missing client ID.");
