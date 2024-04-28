@@ -1,12 +1,16 @@
-{% extends 'global.html' %} {% block content %} {% if linked %}
-<h1>Linked</h1>
-<h3>You have eaten [{{ burger_count }}] burgers.</h3>
-{% else %}
-<h3>Your Burger Resources profile is not linked.</h3>
-<h2>
-  <a
-    href="{{ burger_endpoint }}/authorise?client_id={{ client_id }}&response_type=code&scope=burger_count&redirect_uri={{ redirect_uri }}"
-    >Link now!</a
-  >
-</h2>
-{% endif %} {% endblock content %}
+{% extends 'global.html' %} {% block content %}
+<div class="burgers">
+  {% if linked %}
+  <h1>You have eaten [{{ burger_count }}] burgers.</h1>
+  <h3>Burger Resources account has been linked.</h3>
+  {% else %}
+  <h3>Your Burger Resources profile is not linked.</h3>
+  <h2>
+    <a
+      href="{{ burger_endpoint }}/authorise?client_id={{ client_id }}&response_type=code&scope=burger_count&redirect_uri={{ redirect_uri }}"
+      >Link now!</a
+    >
+  </h2>
+  {% endif %}
+</div>
+{% endblock content %}

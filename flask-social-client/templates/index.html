@@ -1,13 +1,20 @@
 {% extends 'global.html' %} {% block content %}
-<p>
-  Social Client have recently partnered with <i>Burger Resources</i>, allowing
-  our users to display their total burgers eaten on their profile.
-</p>
-<br />
-<h3><a href="/burgers">Give it a try!</a></h3>
-<img
-  src="https://i.ytimg.com/vi/qOOSA_Re5C8/maxresdefault.jpg"
-  alt="Spanian is not a happy chappy."
-  width="200"
-/>
-{% endblock content %}
+<div class="social-content">
+  <div class="post-list">
+    <div class="post">
+      <p>
+        Social Client have recently partnered with <i>Burger Resources</i>,
+        allowing our users to display their total burgers eaten on their
+        profile.
+      </p>
+      <br />
+      <h3><a href="/burgers">Give it a try!</a></h3>
+      <img
+        src="https://i.ytimg.com/vi/qOOSA_Re5C8/maxresdefault.jpg"
+        alt="Spanian is not a happy chappy."
+        width="200"
+      />
+      {% endblock content %}
+    </div>
+  </div>
+</div>

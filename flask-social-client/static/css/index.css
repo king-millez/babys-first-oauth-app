@@ -1,6 +1,55 @@
-html,
 main {
-  padding: 40px;
+  background-color: rgb(8, 8, 8);
+  height: 100%;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background-color: rgb(156, 27, 77);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   color: white;
-  background-color: rgb(16, 16, 16);
+}
+
+.social-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.post-list {
+  width: 50%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+  font-size: 20px;
+}
+
+.post {
+  height: 500px;
+  width: 500px;
+  border-color: rgb(199, 63, 108);
+  border-width: 10px;
+  border-style: solid;
+  padding: 30px;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.post a {
+  color: rgb(199, 63, 108);
+  text-decoration: underline;
+}
+
+.burgers {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  flex-direction: column;
 }
