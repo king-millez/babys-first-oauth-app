@@ -13,7 +13,9 @@ def home_page():
 
 @app.route("/burgers")
 def burgers():
-    token = user_access_token(env["USER_ID"], env["TOKEN_AES_KEY"])
+    token = user_access_token(
+        env["USER_ID"], env["TOKEN_AES_KEY"], env["CLIENT_ID"], env["CLIENT_SECRET"]
+    )
 
     return (
         render_template(

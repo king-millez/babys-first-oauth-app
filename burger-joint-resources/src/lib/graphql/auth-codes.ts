@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { Logger } from "pino";
 import { Either, left, right } from "../../types/either";
 import { ZeusScalars } from "../generated/zeus";
-import { client } from "./client";
+import { gqlClient } from "./client";
 
 type AuthCodeMetadata = {
   user_id: string;
@@ -17,7 +17,7 @@ export const newAccessCode = async (
   scope: Set<string>
 ): Promise<Either<string, string>> => {
   const code = (
-    await client("mutation", { scalars: ZeusScalars({}) })({
+    await gqlClient("mutation", { scalars: ZeusScalars({}) })({
       insert_access_codes_one: [
         { object: { client: clientDbId, user_id: userId, scope: [...scope] } },
         { code: true },
@@ -34,7 +34,7 @@ const markUsedAuthCode = async (
   code: string,
   logger: Logger
 ): Promise<void> => {
-  await client("mutation", { scalars: ZeusScalars({}) })({
+  await gqlClient("mutation", { scalars: ZeusScalars({}) })({
     update_access_codes: [
       { where: { code: { _eq: code } }, _set: { used: true } },
       { affected_rows: true },
@@ -48,7 +48,7 @@ export const authCodeMetadata = async (
   logger: Logger
 ): Promise<Either<string, AuthCodeMetadata>> => {
   const authCodeData = (
-    await client("query", { scalars: ZeusScalars({}) })({
+    await gqlClient("query", { scalars: ZeusScalars({}) })({
       access_codes: [
         { where: { code: { _eq: code } } },
         {
@@ -62,7 +62,7 @@ export const authCodeMetadata = async (
   ).access_codes[0] as AuthCodeMetadata | undefined;
 
   if (authCodeData?.used) {
-    const tokenRevokeResult = await client("mutation", {
+    const tokenRevokeResult = await gqlClient("mutation", {
       scalars: ZeusScalars({}),
     })({
       delete_access_tokens: [
@@ -95,7 +95,7 @@ export const grantDataFromRefreshToken = async (
     .digest("hex");
 
   const maybeToken = (
-    await client("query", { scalars: ZeusScalars({}) })({
+    await gqlClient("query", { scalars: ZeusScalars({}) })({
       refresh_tokens: [
         { where: { token_hash: { _eq: hashedToken } } },
         {
@@ -110,7 +110,7 @@ export const grantDataFromRefreshToken = async (
     })
   ).refresh_tokens[0];
 
-  const revokedRefreshTokens = await client("mutation", {
+  const revokedRefreshTokens = await gqlClient("mutation", {
     scalars: ZeusScalars({}),
   })({
     delete_refresh_tokens: [

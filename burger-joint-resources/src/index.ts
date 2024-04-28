@@ -4,7 +4,7 @@ import path from "path";
 import { env } from "./lib/env";
 import { newAccessCode } from "./lib/graphql/auth-codes";
 import { burgerCount, eatBurger } from "./lib/graphql/burger";
-import { oauthClientFromQuery } from "./lib/graphql/oauth-clients";
+import { oauthClientById } from "./lib/graphql/oauth-clients";
 import { getLogger } from "./lib/logger";
 import { authoriseQuerySchema, clientQuerySchema } from "./lib/oauth/authorise";
 import { addBurgerCountEndpoint } from "./routes/burger-api";
@@ -52,10 +52,7 @@ app.get("/authorise", async (req, res) => {
     return;
   }
 
-  const maybeClient = await oauthClientFromQuery(
-    authoriseQuery.client_id,
-    logger
-  );
+  const maybeClient = await oauthClientById(authoriseQuery.client_id, logger);
 
   if (isLeft(maybeClient)) {
     res.status(404).send(maybeClient.error);
@@ -80,7 +77,7 @@ app.get("/access", async (req, res) => {
     return;
   }
 
-  const maybeClient = await oauthClientFromQuery(
+  const maybeClient = await oauthClientById(
     maybeAccessQuery.data.client_id,
     logger
   );
@@ -92,7 +89,6 @@ app.get("/access", async (req, res) => {
 
   const client = maybeClient.value;
 
-  // Grant a new access code
   const maybeAccessCode = await newAccessCode(
     maybeClient.value.id,
     env.USER_ID,
