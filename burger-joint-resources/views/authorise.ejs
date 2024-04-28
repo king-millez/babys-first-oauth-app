@@ -15,5 +15,5 @@
   <input type="hidden" name="client_id" value="<%= clientId %>" />
   <input type="hidden" name="scope" value="<%= scope %>" />
   <button type="submit">Allow</button>
-  <button type="button" onclick="window.location = '/';">Deny</button>
+  <button type="button" onclick="window.location = '<%= denyCallback %>';">Deny</button>
 </form>

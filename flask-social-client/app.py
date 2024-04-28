@@ -31,12 +31,17 @@ def burgers():
             client_id=env["CLIENT_ID"],
             linked=False,
             burger_endpoint=env["BURGER_RESOURCES_BASE_URL"],
+            redirect_uri=f'{env["SOCIAL_CLIENT_BASE_URL"]}{env["OAUTH_CALLBACK"]}',
         )
     )
 
 
-@app.route("/oauth2/callback")
+@app.route(env["OAUTH_CALLBACK"])
 def oauth_callback():
+    error = request.args.get("error")
+    if error:
+        return f"Received error from Burger Resources: [{error}]", 400
+
     code = request.args.get("code")
     if not code:
         return "No authorisation code provided.", 400
