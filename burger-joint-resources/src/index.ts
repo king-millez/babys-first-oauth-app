@@ -4,9 +4,14 @@ import path from "path";
 import { env } from "./lib/env";
 import { newAccessCode } from "./lib/graphql/auth-codes";
 import { burgerCount, eatBurger } from "./lib/graphql/burger";
-import { oauthClientFromQuery } from "./lib/graphql/oauth-clients";
+import { oauthClientById } from "./lib/graphql/oauth-clients";
 import { getLogger } from "./lib/logger";
-import { authoriseQuerySchema, clientQuerySchema } from "./lib/oauth/authorise";
+import {
+  authoriseQuerySchema,
+  clientIdPresentSchema,
+  clientQuerySchema,
+  redirectUriPresentSchema,
+} from "./lib/oauth/authorise";
 import { addBurgerCountEndpoint } from "./routes/burger-api";
 import { addOauthTokenRoute } from "./routes/oauth-token";
 import { isLeft } from "./types/either";
@@ -36,38 +41,59 @@ app.get("/eat", async (_, res) => {
 });
 
 app.get("/authorise", async (req, res) => {
+  const maybeRedirectUri = redirectUriPresentSchema.safeParse(req.query);
+
+  if (!maybeRedirectUri.success) {
+    res.status(400).send("Missing redirect_uri.");
+    return;
+  }
+
+  const assertedRedirectUri = maybeRedirectUri.data.redirect_uri;
+
+  const maybeClientId = clientIdPresentSchema.safeParse(req.query);
+
+  if (!maybeClientId.success) {
+    res.status(400).send("Invalid or missing client ID.");
+    return;
+  }
+
+  const clientId = maybeClientId.data.client_id;
+
+  const maybeClient = await oauthClientById(clientId, logger);
+
+  if (isLeft(maybeClient)) {
+    res.status(404).send(`Client with client ID [${clientId}] not found.`);
+    return;
+  }
+
+  const client = maybeClient.value;
+
+  if (assertedRedirectUri !== maybeClient.value.redirect_uri) {
+    res.status(400).send("Redirect URI mismatch.");
+    return;
+  }
+
   const maybeAuthoriseQuery = authoriseQuerySchema.safeParse(req.query);
 
   if (!maybeAuthoriseQuery.success) {
-    res.status(400).send(maybeAuthoriseQuery.error.errors);
+    res.redirect(`${assertedRedirectUri}?error=invalid_request`);
     return;
   }
 
   const authoriseQuery = maybeAuthoriseQuery.data;
 
   if (authoriseQuery.response_type !== "code") {
-    res.status(400).send(
-      `Invalid response type [${authoriseQuery.response_type}]. Required [code].` // Yeah I know this is vulnerable to XSS; don't deploy this in a prod environment.
-    );
-    return;
-  }
-
-  const maybeClient = await oauthClientFromQuery(
-    authoriseQuery.client_id,
-    logger
-  );
-
-  if (isLeft(maybeClient)) {
-    res.status(404).send(maybeClient.error);
+    res.redirect(`${assertedRedirectUri}?error=unsupported_response_type`);
     return;
   }
 
   res.render("global", {
     viewName: "./authorise.ejs",
     data: {
-      clientName: maybeClient.value.name,
-      clientId: maybeClient.value.client_id,
+      clientName: client.name,
+      clientId: client.client_id,
       scope: [...authoriseQuery.scope].join(" "),
+      denyCallback: `${assertedRedirectUri}?error=access_denied`,
     },
   });
 });
@@ -80,7 +106,7 @@ app.get("/access", async (req, res) => {
     return;
   }
 
-  const maybeClient = await oauthClientFromQuery(
+  const maybeClient = await oauthClientById(
     maybeAccessQuery.data.client_id,
     logger
   );
@@ -92,7 +118,6 @@ app.get("/access", async (req, res) => {
 
   const client = maybeClient.value;
 
-  // Grant a new access code
   const maybeAccessCode = await newAccessCode(
     maybeClient.value.id,
     env.USER_ID,

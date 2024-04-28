@@ -5,6 +5,7 @@ import {
   grantDataFromRefreshToken,
 } from "../lib/graphql/auth-codes";
 import { mintAccessToken } from "../lib/jwt";
+import { credsFromBasicAuth, headerValue } from "../lib/oauth/basic-auth";
 import { authCodeQuerySchema, authenticateClient } from "../lib/oauth/client";
 import { isLeft } from "../types/either";
 
@@ -20,17 +21,32 @@ export const addOauthTokenRoute = (app: Express, logger: Logger) => {
 
     const clientAuthRequest = maybeClientAuth.data;
 
+    const rawHeaderAuth = headerValue(
+      req.headers.authorization ?? req.headers.Authorization
+    );
+
+    const authCredentials =
+      rawHeaderAuth !== undefined
+        ? credsFromBasicAuth(rawHeaderAuth)
+        : clientAuthRequest.client_id !== undefined
+          ? {
+              clientId: clientAuthRequest.client_id,
+              clientSecret: clientAuthRequest.client_secret,
+            }
+          : undefined;
+
+    if (authCredentials === undefined) {
+      res.status(401).send("Invalid client credentials.");
+      return;
+    }
+
     logger.info(
-      `Received a [${clientAuthRequest.grant_type}] request from [${clientAuthRequest.client_id}].`
+      `Received [${clientAuthRequest.grant_type}] request from [${authCredentials.clientId}].`
     );
 
-    const validAuth = await authenticateClient(
-      clientAuthRequest.client_id,
-      clientAuthRequest.client_secret,
-      logger
-    );
+    const validAuth = await authenticateClient(authCredentials, logger);
 
-    logger.debug({ validAuth, clientId: clientAuthRequest.client_id });
+    logger.debug({ validAuth, clientId: authCredentials.clientId });
 
     if (!validAuth) {
       res.status(401).send("Invalid client credentials.");
@@ -55,7 +71,7 @@ export const addOauthTokenRoute = (app: Express, logger: Logger) => {
 
     const { accessToken, refreshToken, exp, iat } = await mintAccessToken(
       grantData.user_id,
-      clientAuthRequest.client_id,
+      authCredentials.clientId,
       grantData.scope,
       grantData.code
     );

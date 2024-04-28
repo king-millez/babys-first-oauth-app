@@ -4,7 +4,7 @@ import { Logger } from "pino";
 import { Either, left, right } from "../types/either";
 import { env } from "./env";
 import { ZeusScalars } from "./generated/zeus";
-import { client } from "./graphql/client";
+import { gqlClient } from "./graphql/client";
 
 export const mintAccessToken = async (
   userId: string,
@@ -43,10 +43,9 @@ export const mintAccessToken = async (
     { header: { alg: "RS256", typ: "at+JWT" }, algorithm: "RS256" }
   );
 
-  // Write refresh token
   const refreshToken = Buffer.from(crypto.randomUUID()).toString("base64");
 
-  await client("mutation", { scalars: ZeusScalars({}) })({
+  await gqlClient("mutation", { scalars: ZeusScalars({}) })({
     insert_access_tokens_one: [
       {
         object: {

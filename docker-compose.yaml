@@ -93,6 +93,7 @@ services:
       - TOKEN_AES_KEY=${TOKEN_AES_KEY}
       - BURGER_RESOURCES_BASE_URL=${BURGER_RESOURCES_BASE_URL}
       - SOCIAL_CLIENT_BASE_URL=${SOCIAL_CLIENT_BASE_URL}
+      - OAUTH_CALLBACK=/oauth2/callback
     hostname: social.local
 networks:
   oauth_bridge:

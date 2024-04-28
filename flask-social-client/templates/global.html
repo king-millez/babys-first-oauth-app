@@ -11,12 +11,17 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/index.css') }}"
     />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="https://cdn-icons-png.freepik.com/256/1077/1077114.png?semt=ais_hybrid"
+    />
   </head>
   <body>
-    <main>
+    <nav>
       <h1>Social Client</h1>
       <h3>Logged in as <b>{{ user_id }}</b></h3>
-      {% block content %} {%endblock %}
-    </main>
+    </nav>
+    <main>{% block content %} {%endblock %}</main>
   </body>
 </html>

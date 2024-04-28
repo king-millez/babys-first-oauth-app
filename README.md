@@ -23,7 +23,9 @@ You will need:
    127.0.0.1 localhost burger.local social.local
    ```
 
-2. On the first run, just use the `start_local.py` script to spin up the local environment and retrieve the required environment variables:
+2. Run the `generate_envrc.py` to set all the required environment variables. **This won't work without `direnv`**.
+
+3. On the first run, just use the `start_local.py` script to spin up the local environment and retrieve the required environment variables:
 
    ```sh
    $ python3 start_local.py
@@ -35,4 +37,6 @@ Note that this has not been designed to be deployed anywhere beyond your local m
 
 ## Usage
 
-...
+When you visit `burger.local`, you'll be able to update your burger count for bragging rights. This is pretty cool, but perhaps you want to display this value on another service? Thankfully, `social.local` has registered an OAuth 2.0 client with `burger.local`.
+
+To link your `burger.local` profile with your `social.local` profile, simply go to `social.local/burgers` and click "Link now!". Authorise the OAuth 2.0 access request and your burger count should magically appear on your `social.local` profile using the power of OAuth.
