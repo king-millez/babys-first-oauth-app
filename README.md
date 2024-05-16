@@ -35,6 +35,11 @@ You will need:
 
 Note that this has not been designed to be deployed anywhere beyond your local machine for testing and learning purposes. Do not use any of this code in production. Do not deploy this anywhere else. Do not email me complaining that things don't work. You have been warned.
 
+## What's implemented
+
+* `/authorise` supports the authorization code grant flow.
+* `/token` supports completion of the authorization code grant flow and token exchange of a refresh token for a new access token. In both cases, the supported security mechanism is client id and secret and is suitable for use by confidential clients only.
+
 ## Usage
 
 When you visit `burger.local`, you'll be able to update your burger count for bragging rights. This is pretty cool, but perhaps you want to display this value on another service? Thankfully, `social.local` has registered an OAuth 2.0 client with `burger.local`.
